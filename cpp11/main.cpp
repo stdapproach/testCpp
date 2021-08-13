@@ -1,6 +1,7 @@
 #include <iostream>
 #include <type_traits>
 #include <vector>
+#include <string>
 #include <map>
 #include <cassert>
 
@@ -90,6 +91,25 @@ struct no_copy
         S() // default member initializer will copy-initialize n, list-initialize s
         { }
     };
+}
+
+namespace mem {
+    int *pi;
+}
+
+namespace mov {//move-semantics
+    struct A {
+        int a1;
+        string str;
+        A(const char* pch):str(pch){cout <<"ctrA, str="<<str<<endl;}
+        A(const A& rh):a1{rh.a1},str{rh.str} {cout <<"copy ctrA, str="<<str<<endl;};
+        ~A(){cout <<"dtrA, str="<<str<<endl;}
+        void boo() {cout <<"boo str="<<str<<"\n";}
+        void boo()const {cout <<"boo const str="<<str<<"\n";}
+    };
+    void foo(A a) {cout<< "foo(A a), str="<<a.str<<"\n";}
+    //void foo(const A a) {cout<< "foo(const A a)\n";}-redefinition
+    void foo(A& a) {cout<< "foo(A& a), str="<<a.str<<"\n";}
 }
 
 int main()
@@ -183,6 +203,25 @@ int main()
         }
     }
     //override and final
+
+    //2delete
+    {
+        using namespace mem;
+        pi = new int(42);
+        cout << "i=" << *pi << endl;
+        delete pi;
+        //cout << "2i=" << *pi << endl;
+        pi = nullptr;
+        //cout << "3i=" << *pi << endl;
+        delete pi;
+    }
+    {//move semantic
+        using namespace mov;
+        //A a1("a1");
+        const A a2{"a2"};
+        //a1.boo();
+        a2.boo();
+    }
 
     return 0;
 }
